@@ -1,11 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix='/quality-records', tags=['quality-records'])
+from app.api.v1.dependencies import get_current_user
+from app.models import User
 
-@router.get('/')
-def list_quality_records():
-    return {'items': []}
 
-@router.post('/')
-def create_quality_record(payload: dict):
-    return {'created': True, 'payload': payload}
+router = APIRouter(
+    prefix="/quality-records",
+    tags=["quality-records"],
+    dependencies=[Depends(get_current_user)],
+)
+
+
+@router.get("/")
+def list_quality_records(current_user: User = Depends(get_current_user)):
+    return {"items": [], "requested_by": current_user.email}
+
+
+@router.post("/")
+def create_quality_record(payload: dict, current_user: User = Depends(get_current_user)):
+    return {"created": True, "payload": payload, "requested_by": current_user.email}
