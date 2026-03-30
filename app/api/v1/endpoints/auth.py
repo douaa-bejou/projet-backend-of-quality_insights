@@ -17,11 +17,11 @@ def signup(payload: SignUpRequest, db: Session = Depends(get_db)) -> AuthRespons
     name = payload.name.strip()
 
     if payload.password != payload.confirm_password:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password confirmation mismatch.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Les mots de passe ne correspondent pas.")
 
     existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists.")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un compte avec cet email existe deja.")
 
     user = User(name=name, email=email, password_hash=hash_password(payload.password))
     db.add(user)
@@ -38,7 +38,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
     if not user or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou mot de passe incorrect.")
 
     token = create_access_token(subject=user.email, user_id=user.id)
     return AuthResponse(access_token=token, user=UserPublic.model_validate(user))

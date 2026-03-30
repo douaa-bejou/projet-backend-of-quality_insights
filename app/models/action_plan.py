@@ -1,6 +1,6 @@
-from datetime import date, datetime
+from datetime import date
 
-from sqlalchemy import CheckConstraint, Date, DateTime, Integer, String, Text, func
+from sqlalchemy import CheckConstraint, Date, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -25,5 +25,3 @@ class ActionPlan(Base):
     realisation: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     efficacite: Mapped[str] = mapped_column(String(30), nullable=False, default="En cours", index=True)
     responsable: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, onupdate=func.now())
