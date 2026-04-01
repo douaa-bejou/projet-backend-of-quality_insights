@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.dependencies import get_current_user, get_db
 from app.models import User
-from app.schemas import AuthResponse, LoginRequest, SignUpRequest, UserPublic
+from app.schemas import AuthResponse, LoginRequest, SignUpRequest, UpdateProfileRequest, UserPublic
 from app.services import create_access_token, hash_password, verify_password
 
 
@@ -46,4 +46,27 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
 
 @router.get("/me", response_model=UserPublic)
 def me(current_user: User = Depends(get_current_user)) -> UserPublic:
+    return UserPublic.model_validate(current_user)
+
+
+@router.put("/me", response_model=UserPublic)
+def update_me(
+    payload: UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserPublic:
+    email = payload.email.strip().lower()
+    name = payload.name.strip()
+
+    existing = db.execute(
+        select(User).where(User.email == email, User.id != current_user.id),
+    ).scalar_one_or_none()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Un compte avec cet email existe deja.")
+
+    current_user.name = name
+    current_user.email = email
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
     return UserPublic.model_validate(current_user)

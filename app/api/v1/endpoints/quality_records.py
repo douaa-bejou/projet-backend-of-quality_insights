@@ -91,6 +91,9 @@ def create_quality_record(
         zone=payload.zone,
         qte_ok=payload.qte_ok,
         qte_nok=payload.qte_nok,
+        qte_nok_defaut=payload.qte_nok_defaut,
+        qte_nok_moulage=payload.qte_nok_moulage,
+        qte_nok_zone=payload.qte_nok_zone,
         qte_scrap=payload.qte_scrap,
         qte_rework=payload.qte_rework,
     )
@@ -125,6 +128,9 @@ def update_quality_record(
     record.zone = payload.zone
     record.qte_ok = payload.qte_ok
     record.qte_nok = payload.qte_nok
+    record.qte_nok_defaut = payload.qte_nok_defaut
+    record.qte_nok_moulage = payload.qte_nok_moulage
+    record.qte_nok_zone = payload.qte_nok_zone
     record.qte_scrap = payload.qte_scrap
     record.qte_rework = payload.qte_rework
 
@@ -151,6 +157,9 @@ def update_quality_record(
             related.designation = record.designation
             related.qte_ok = record.qte_ok
             related.qte_nok = 0
+            related.qte_nok_defaut = 0
+            related.qte_nok_moulage = 0
+            related.qte_nok_zone = 0
             related.qte_scrap = record.qte_scrap
             related.qte_rework = record.qte_rework
 

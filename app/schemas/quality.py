@@ -24,12 +24,23 @@ class QualityRecordBase(BaseModel):
     zone: str
     qte_ok: int = Field(0, alias="qteOk")
     qte_nok: int = Field(0, alias="qteNok")
+    qte_nok_defaut: int = Field(0, alias="qteNokDefaut")
+    qte_nok_moulage: int = Field(0, alias="qteNokMoulage")
+    qte_nok_zone: int = Field(0, alias="qteNokZone")
     qte_scrap: int = Field(0, alias="qteScrap")
     qte_rework: int = Field(0, alias="qteRework")
 
     model_config = ConfigDict(populate_by_name=True)
 
-    @field_validator("qte_ok", "qte_nok", "qte_scrap", "qte_rework")
+    @field_validator(
+        "qte_ok",
+        "qte_nok",
+        "qte_nok_defaut",
+        "qte_nok_moulage",
+        "qte_nok_zone",
+        "qte_scrap",
+        "qte_rework",
+    )
     @classmethod
     def validate_non_negative(cls, value: int) -> int:
         if value < 0:

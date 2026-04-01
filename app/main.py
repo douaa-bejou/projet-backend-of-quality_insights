@@ -6,12 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import api_router
 from app.config import settings
 from app.database import Base, engine
+from app.database_migrations import apply_runtime_migrations
 from app import models  # noqa: F401
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
+    apply_runtime_migrations(engine)
     yield
 
 

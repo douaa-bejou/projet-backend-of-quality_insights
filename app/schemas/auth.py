@@ -63,6 +63,27 @@ class LoginRequest(BaseModel):
         return cleaned
 
 
+class UpdateProfileRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: str = Field(min_length=5, max_length=190)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        cleaned = value.strip()
+        if len(cleaned) < 2:
+            raise ValueError("Le nom doit contenir au moins 2 caracteres.")
+        return cleaned
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        cleaned = value.strip().lower()
+        if not EMAIL_REGEX.match(cleaned):
+            raise ValueError("Format email invalide.")
+        return cleaned
+
+
 class UserPublic(BaseModel):
     id: int
     name: str

@@ -11,6 +11,9 @@ class QualityRecord(Base):
     __table_args__ = (
         CheckConstraint("qte_ok >= 0", name="ck_quality_records_qte_ok_non_negative"),
         CheckConstraint("qte_nok >= 0", name="ck_quality_records_qte_nok_non_negative"),
+        CheckConstraint("qte_nok_defaut >= 0", name="ck_quality_records_qte_nok_defaut_non_negative"),
+        CheckConstraint("qte_nok_moulage >= 0", name="ck_quality_records_qte_nok_moulage_non_negative"),
+        CheckConstraint("qte_nok_zone >= 0", name="ck_quality_records_qte_nok_zone_non_negative"),
         CheckConstraint("qte_scrap >= 0", name="ck_quality_records_qte_scrap_non_negative"),
         CheckConstraint("qte_rework >= 0", name="ck_quality_records_qte_rework_non_negative"),
         Index("ix_quality_records_date_project_shift", "date", "projet", "shift"),
@@ -31,6 +34,9 @@ class QualityRecord(Base):
     zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     qte_ok: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     qte_nok: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    qte_nok_defaut: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    qte_nok_moulage: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    qte_nok_zone: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     qte_scrap: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     qte_rework: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now(), index=True)
