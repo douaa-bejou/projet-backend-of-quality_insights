@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -22,18 +23,23 @@ def ensure_bootstrap_admin() -> None:
     if not email or not password:
         return
 
-    with Session(engine) as db:
-        existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
-        if existing:
-            existing.name = name
-            existing.password_hash = hash_password(password)
-            db.add(existing)
-            db.commit()
-            return
+    try:
+        with Session(engine) as db:
+            existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+            if existing:
+                # Keep admin credentials in sync with environment defaults.
+                existing.name = name
+                existing.password_hash = hash_password(password)
+                db.add(existing)
+                db.commit()
+                return
 
-        user = User(name=name, email=email, password_hash=hash_password(password))
-        db.add(user)
-        db.commit()
+            user = User(name=name, email=email, password_hash=hash_password(password))
+            db.add(user)
+            db.commit()
+    except SQLAlchemyError as exc:
+        # Bootstrap should not make the whole API unavailable.
+        print(f"[bootstrap-admin] skipped: {exc}")
 
 
 @asynccontextmanager

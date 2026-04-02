@@ -1,10 +1,38 @@
-version: '3.9'
+version: "3.9"
+
 services:
   db:
-    image: postgres:15
+    image: mysql:8.0
+    container_name: quality_insights_db
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: quality_insights
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: quality_insights
     ports:
-      - '5432:5432'
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: quality_insights_api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://root:@db:3306/quality_insights
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173
+      BOOTSTRAP_ADMIN_NAME: Responsable
+      BOOTSTRAP_ADMIN_EMAIL: admin@gmail.com
+      BOOTSTRAP_ADMIN_PASSWORD: ChangeMe123!
+    ports:
+      - "8000:8000"
+
+volumes:
+  mysql_data:
