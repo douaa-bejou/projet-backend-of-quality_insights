@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import CheckConstraint, Date, Integer, String, Text
+from sqlalchemy import BigInteger, CheckConstraint, Date, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -12,9 +12,9 @@ class ActionPlan(Base):
         CheckConstraint("realisation >= 0 AND realisation <= 100", name="ck_action_plans_realisation_range"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    numero: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    cv: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    numero: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
+    cv: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     non_conformite: Mapped[str] = mapped_column(Text, nullable=False)
     cause: Mapped[str] = mapped_column(Text, nullable=False)

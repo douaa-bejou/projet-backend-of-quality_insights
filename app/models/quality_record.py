@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import CheckConstraint, Date, DateTime, Index, Integer, String, func
+from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, Index, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -19,7 +19,7 @@ class QualityRecord(Base):
         Index("ix_quality_records_date_project_shift", "date", "projet", "shift"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     mois: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
@@ -32,11 +32,11 @@ class QualityRecord(Base):
     defaut: Mapped[str | None] = mapped_column(String(100), nullable=True)
     moulage_profil: Mapped[str] = mapped_column(String(50), nullable=False)
     zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    qte_ok: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_nok: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_nok_defaut: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_nok_moulage: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_nok_zone: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_scrap: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    qte_rework: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    qte_ok: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_nok: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_nok_defaut: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_nok_moulage: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_nok_zone: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_scrap: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    qte_rework: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now(), index=True)
