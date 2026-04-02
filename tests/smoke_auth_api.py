@@ -42,7 +42,7 @@ def run(base_url: str, password: str) -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Smoke test for signup/login endpoints.")
-    parser.add_argument("--base-url", default="http://127.0.0.1:8001", help="Backend base URL.")
+    parser.add_argument("--base-url", default="http://127.0.0.1:8000", help="Backend base URL.")
     parser.add_argument("--password", default="Secret123", help="Password used by the smoke user.")
     return parser.parse_args()
 

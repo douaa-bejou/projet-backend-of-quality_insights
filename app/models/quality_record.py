@@ -19,7 +19,12 @@ class QualityRecord(Base):
         Index("ix_quality_records_date_project_shift", "date", "projet", "shift"),
     )
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+        index=True,
+    )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     mois: Mapped[str] = mapped_column(String(20), nullable=False, index=True)

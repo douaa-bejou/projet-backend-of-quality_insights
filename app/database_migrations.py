@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Engine
 
@@ -102,7 +104,104 @@ def _apply_mysql_capacity_migrations(engine: Engine) -> None:
         _add_index_if_missing(engine, table_name, index_name, columns_sql)
 
 
+def _is_sqlite(engine: Engine) -> bool:
+    return engine.dialect.name == "sqlite"
+
+
+def _sqlite_rebuild_bigint_primary_key_table(engine: Engine, table_name: str) -> bool:
+    # SQLite autoincrement behavior only works with INTEGER primary keys.
+    with engine.begin() as connection:
+        row = connection.execute(
+            text("SELECT sql FROM sqlite_master WHERE type='table' AND name=:name"),
+            {"name": table_name},
+        ).fetchone()
+        if not row or not row[0]:
+            return False
+
+        create_sql = str(row[0])
+        if not re.search(r"\bid\s+BIGINT\b", create_sql, flags=re.IGNORECASE):
+            return False
+
+        index_rows = connection.execute(
+            text(
+                """
+                SELECT sql
+                FROM sqlite_master
+                WHERE type='index'
+                  AND tbl_name=:name
+                  AND sql IS NOT NULL
+                """
+            ),
+            {"name": table_name},
+        ).fetchall()
+        index_sql_statements = [str(index_row[0]) for index_row in index_rows if index_row and index_row[0]]
+
+        temp_table_name = f"{table_name}__pkfix"
+        connection.execute(text(f'DROP TABLE IF EXISTS "{temp_table_name}"'))
+
+        temp_create_sql = re.sub(
+            rf'CREATE TABLE\s+"?{re.escape(table_name)}"?',
+            f'CREATE TABLE "{temp_table_name}"',
+            create_sql,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        temp_create_sql = re.sub(
+            r"\bid\s+BIGINT\s+NOT\s+NULL\b",
+            "id INTEGER NOT NULL",
+            temp_create_sql,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        if re.search(r"\bid\s+BIGINT\b", temp_create_sql, flags=re.IGNORECASE):
+            temp_create_sql = re.sub(
+                r"\bid\s+BIGINT\b",
+                "id INTEGER",
+                temp_create_sql,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+
+        connection.execute(text(temp_create_sql))
+
+        column_rows = connection.execute(text(f'PRAGMA table_info("{table_name}")')).fetchall()
+        column_names = [str(column_row[1]) for column_row in column_rows]
+        if column_names:
+            columns_sql = ", ".join(f'"{column_name}"' for column_name in column_names)
+            connection.execute(
+                text(
+                    f"""
+                    INSERT INTO "{temp_table_name}" ({columns_sql})
+                    SELECT {columns_sql}
+                    FROM "{table_name}"
+                    """
+                )
+            )
+
+        connection.execute(text(f'DROP TABLE "{table_name}"'))
+        connection.execute(text(f'ALTER TABLE "{temp_table_name}" RENAME TO "{table_name}"'))
+
+        for index_sql in index_sql_statements:
+            connection.execute(text(index_sql))
+
+    return True
+
+
+def _apply_sqlite_primary_key_migrations(engine: Engine) -> None:
+    if not _is_sqlite(engine):
+        return
+
+    inspector = inspect(engine)
+    table_names = set(inspector.get_table_names())
+
+    for table_name in ("users", "action_plans", "non_conformities", "quality_records"):
+        if table_name in table_names:
+            _sqlite_rebuild_bigint_primary_key_table(engine, table_name)
+
+
 def apply_runtime_migrations(engine: Engine) -> None:
+    _apply_sqlite_primary_key_migrations(engine)
+
     inspector = inspect(engine)
     if "quality_records" not in inspector.get_table_names():
         return

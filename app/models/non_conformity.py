@@ -12,7 +12,12 @@ class NonConformity(Base):
         CheckConstraint("qte_nok >= 0", name="ck_non_conformities_qte_nok_non_negative"),
     )
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+        index=True,
+    )
     numero: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True, unique=True)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
