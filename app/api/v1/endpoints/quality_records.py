@@ -87,6 +87,7 @@ def create_quality_record(
         poste=payload.poste,
         parts_origin=payload.parts_origin,
         defaut=payload.defaut,
+        photo_url=payload.photo_url,
         moulage_profil=payload.moulage_profil,
         zone=payload.zone,
         qte_ok=payload.qte_ok,
@@ -124,6 +125,7 @@ def update_quality_record(
     record.poste = payload.poste
     record.parts_origin = payload.parts_origin
     record.defaut = payload.defaut
+    record.photo_url = payload.photo_url
     record.moulage_profil = payload.moulage_profil
     record.zone = payload.zone
     record.qte_ok = payload.qte_ok
@@ -155,6 +157,7 @@ def update_quality_record(
             related.van = record.van
             related.shift = record.shift
             related.designation = record.designation
+            related.photo_url = record.photo_url
             related.qte_ok = record.qte_ok
             related.qte_nok = 0
             related.qte_nok_defaut = 0

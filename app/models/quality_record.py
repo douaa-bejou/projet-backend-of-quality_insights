@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, Index, Integer, String, func
+from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -35,6 +35,7 @@ class QualityRecord(Base):
     poste: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     parts_origin: Mapped[str] = mapped_column(String(1), nullable=False, index=True)
     defaut: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    photo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     moulage_profil: Mapped[str] = mapped_column(String(50), nullable=False)
     zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     qte_ok: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)

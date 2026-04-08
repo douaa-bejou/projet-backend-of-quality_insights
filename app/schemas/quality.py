@@ -20,6 +20,7 @@ class QualityRecordBase(BaseModel):
     poste: PosteType
     parts_origin: OriginType = Field(alias="partsOrigin")
     defaut: str | None = None
+    photo_url: str | None = Field(default=None, alias="photoUrl")
     moulage_profil: str = Field(alias="moulageProfil")
     zone: str
     qte_ok: int = Field(0, alias="qteOk")

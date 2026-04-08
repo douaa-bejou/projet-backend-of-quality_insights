@@ -211,6 +211,7 @@ def apply_runtime_migrations(engine: Engine) -> None:
         ("qte_nok_defaut", "qte_nok_defaut INTEGER NOT NULL DEFAULT 0"),
         ("qte_nok_moulage", "qte_nok_moulage INTEGER NOT NULL DEFAULT 0"),
         ("qte_nok_zone", "qte_nok_zone INTEGER NOT NULL DEFAULT 0"),
+        ("photo_url", "photo_url TEXT NULL"),
     ]
 
     for column_name, column_sql in columns_to_add:
@@ -218,10 +219,11 @@ def apply_runtime_migrations(engine: Engine) -> None:
         if added:
             added_columns.append(column_name)
 
-    # Backfill only when columns have just been created, to preserve current values on next runs.
-    if added_columns:
+    # Backfill only quantity columns when they are newly created.
+    backfill_columns = [column_name for column_name in added_columns if column_name.startswith("qte_nok_")]
+    if backfill_columns:
         with engine.begin() as connection:
-            for column_name in added_columns:
+            for column_name in backfill_columns:
                 connection.execute(
                     text(
                         f"""
